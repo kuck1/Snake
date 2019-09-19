@@ -25,6 +25,9 @@
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 
+var right = 400;
+var bottom = 400;
+
 var grid = 16;
 var count = 0;
   
@@ -47,12 +50,35 @@ var apple = {
   y: 320
 };
 
+var onTrack = false;
+
 // get random whole numbers in a specific range
 // @see https://stackoverflow.com/a/1527820/2124254
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
+// function callAI(snake, apple) {
+//   if (!onTrack){
+//     if (snake.y != grid){
+//       snake.dx = 0;
+//       snake.dy = -grid;
+//     } else {
+//       if (snake.x != 400 - grid) {
+//         snake.dx = grid;
+//         snake.dy = 0;
+//       }
+//         snake.dx = 0;
+//         snake.dy = 0;
+//         onTrack = true;
+//     }
+//     else {
+      
+//     }
+//   }
+
+//   return snake;
+// }
 // game loop
 function loop() {
   requestAnimationFrame(loop);
@@ -62,6 +88,8 @@ function loop() {
     return;
   }
 
+  // snake = callAI(snake, apple)
+
   count = 0;
   context.clearRect(0,0,canvas.width,canvas.height);
 
@@ -69,28 +97,10 @@ function loop() {
   snake.x += snake.dx;
   snake.y += snake.dy;
 
-
-
   // Hard edges for snake
   if (snake.x < 0 || snake.x >= canvas.width || snake.y < 0 || snake.y >= canvas.height) {
     resetGame();
   }
-
-  // // wrap snake position horizontally on edge of screen
-  // if (snake.x < 0) {
-  //   snake.x = canvas.width - grid;
-  // }
-  // else if (snake.x >= canvas.width) {
-  //   snake.x = 0;
-  // }
-  
-  // // wrap snake position vertically on edge of screen
-  // if (snake.y < 0) {
-  //   snake.y = canvas.height - grid;
-  // }
-  // else if (snake.y >= canvas.height) {
-  //   snake.y = 0;
-  // }
 
   // keep track of where snake has been. front of the array is always the head
   snake.cells.unshift({x: snake.x, y: snake.y});
@@ -126,15 +136,6 @@ function loop() {
       // snake occupies same space as a body part. reset game
       if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
         resetGame()
-        // snake.x = 160;
-        // snake.y = 160;
-        // snake.cells = [];
-        // snake.maxCells = 4;
-        // snake.dx = grid;
-        // snake.dy = 0;
-
-        // apple.x = getRandomInt(0, 25) * grid;
-        // apple.y = getRandomInt(0, 25) * grid;
       }
     }
   });
@@ -151,6 +152,8 @@ function resetGame() {
   apple.x = getRandomInt(0, 25) * grid;
   apple.y = getRandomInt(0, 25) * grid;
 }
+
+
 
 // listen to keyboard events to move the snake
 document.addEventListener('keydown', function(e) {
