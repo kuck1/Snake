@@ -53,6 +53,10 @@ var apple = {
 };
 
 var onTrack = false;
+var uTurn = false;
+var simple = true;
+var headPassedTop = false;
+var tailPassedTop = false;
 
 // get random whole numbers in a specific range
 // @see https://stackoverflow.com/a/1527820/2124254
@@ -64,7 +68,65 @@ function callAI(snake, apple) {
   if (snake.x == 0){
     onTrack = false;
   }
+  setSimple();
 
+  if (simple) {
+    update_snake = simple_path();
+    return update_snake
+  }
+  else {
+    console.log("not simple")
+    if (snake.y == apple.y){
+      snake.dx = -grid;
+      snake.dy = 0;
+    } else if (snake.y < apple.y && snake.dy > 0){
+      if (uTurn) {
+        snake.dy = -grid;
+        uTurn = false;
+      } else {
+        snake.dy = 0;
+        snake.dx = -grid;
+        uTurn = true;
+      }
+    } else if (snake.y > apple.y && snake.dy < 0){
+      console.log("not simple")
+      if (uTurn) {
+        snake.dy = grid;
+        uTurn = false;
+      } else {
+        snake.dy = 0;
+        snake.dx = -grid;
+        uTurn = true;
+      }
+    }
+  }
+  return update_snake;
+} 
+
+function setSimple() {
+  if(!simple && headPassedTop && tailPassedTop) {
+    headPassedTop = false;
+    tailPassedTop = false;
+  }
+  if(snake.y == 0) {
+    headPassedTop = true;
+  }
+
+  if (snake.cells.length > 0) {
+    tail = snake.cells[snake.cells.length-1];
+    if(tail.y == 0) {
+      tailPassedTop = true;
+    }
+    if (!simple && snake.x == grid) {
+      simple = true
+    }
+    else if (simple && tailPassedTop) {
+      simple = false;
+    }
+  }
+}
+
+function simple_path() {
   if (onTrack){
 
     // Hit top
