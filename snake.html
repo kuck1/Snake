@@ -53,6 +53,7 @@ var apple = {
 };
 
 var onTrack = false;
+var atStart = true;
 var uTurn = false;
 var simple = true;
 var headPassedTop = false;
@@ -77,9 +78,13 @@ function callAI(snake, apple) {
   else {
     console.log("not simple")
     if (snake.y == apple.y){
+      console.log("apple here")
+      console.log(snake.y)
+      console.log(apple.y)
       snake.dx = -grid;
       snake.dy = 0;
-    } else if (snake.y < apple.y && snake.dy > 0){
+    } else if (snake.y < apple.y && snake.dy <= 0){
+      console.log("apple down")
       if (uTurn) {
         snake.dy = -grid;
         uTurn = false;
@@ -88,8 +93,8 @@ function callAI(snake, apple) {
         snake.dx = -grid;
         uTurn = true;
       }
-    } else if (snake.y > apple.y && snake.dy < 0){
-      console.log("not simple")
+    } else if (snake.y > apple.y && snake.dy >= 0){
+      console.log("apple up")
       if (uTurn) {
         snake.dy = grid;
         uTurn = false;
@@ -98,12 +103,30 @@ function callAI(snake, apple) {
         snake.dx = -grid;
         uTurn = true;
       }
+    } else {
+      console.log("apple on track")
     }
   }
   return update_snake;
 } 
 
 function setSimple() {
+  if (snake.cells.length > 0) {
+    tail = snake.cells[snake.cells.length-1];
+    if(tail.x == right - grid && snake.x == right - 2*grid) {
+      atStart = false;
+    }
+  }
+
+  if (atStart) { 
+    simple = true;
+    return;
+  }
+  if (snake.x <= grid  || apple.x > snake.x) {
+    simple = true;
+    return;
+  }
+
   if(!simple && headPassedTop && tailPassedTop) {
     headPassedTop = false;
     tailPassedTop = false;
@@ -114,13 +137,10 @@ function setSimple() {
 
   if (snake.cells.length > 0) {
     tail = snake.cells[snake.cells.length-1];
-    if(tail.y == 0) {
+    if(tail.y == 0 || tail.x == right - 2*grid) {
       tailPassedTop = true;
     }
-    if (!simple && snake.x == grid) {
-      simple = true
-    }
-    else if (simple && tailPassedTop) {
+    if (simple && tailPassedTop) {
       simple = false;
     }
   }
@@ -131,7 +151,6 @@ function simple_path() {
 
     // Hit top
     if (snake.y == grid){
-      console.log("hi")
       if (snake.dy == -grid){
         snake.dx = -grid
         snake.dy = 0
@@ -144,7 +163,6 @@ function simple_path() {
 
     // Hit bottom
     if (snake.y == bottom - grid){
-      console.log("hi")
       if (snake.dy == grid){
         snake.dx = -grid
         snake.dy = 0
@@ -178,9 +196,9 @@ function loop() {
   requestAnimationFrame(loop);
 
   // slow game loop to 15 fps instead of 60 (60/15 = 4)
-  // if (++count < 4) {
-  //   return;
-  // }
+  if (++count < 4) {
+    return;
+  }
 
   snake = callAI(snake, apple)
 
@@ -236,6 +254,13 @@ function loop() {
 }
 
 function resetGame() {
+  var onTrack = false;
+  var uTurn = false;
+  var atStart = true;
+  var simple = true;
+  var headPassedTop = false;
+  var tailPassedTop = false;
+
   snake.x = 160;
   snake.y = 160;
   snake.cells = [];
@@ -245,8 +270,6 @@ function resetGame() {
 
   apple.x = getRandomInt(0, dim) * grid;
   apple.y = getRandomInt(0, dim) * grid;
-
-  onTrack = false;
 }
 
 
