@@ -55,8 +55,13 @@ var apple = {
 var appleCount = 1;
 
 var nextApple = {
-  x: [.5 * right, 4*grid, 2*grid, 8*grid],
+  x: [.5 * right, 8*grid, 2*grid, 8*grid],
   y: [.5 * bottom, 3*grid, 12*grid, 3*grid]
+};
+
+var nextAppleFail1 = {
+  x: [.5 * right, 2*grid, 2*grid, 8*grid],
+  y: [.5 * bottom, 0*grid, 12*grid, 3*grid]
 };
 
 var onTrack = false;
@@ -75,13 +80,14 @@ function getRandomInt(min, max) {
 }
 
 function callAI(snake, apple) {
-  if (snake.x == 0){
+  if (snake.x == 0 || apple.x > snake.x){
     onTrack = false;
   }
   setSimple();
 
   if (simple) {
-    console.log("simple")
+    // console.log("simple")
+    console.log("regular")
     update_snake = simple_path();
     return update_snake
   }
@@ -145,19 +151,25 @@ function setSimple() {
   }
 
   // Turn simple on when left side reached
-  if (snake.x <= grid  || apple.x > snake.x) {
+  if (snake.x == 0 || apple.x > snake.x) {
   // if (snake.x <= grid) {
     simple = true;
     return;
   }
 
-
-  // Turn simple off when right side reached
-  if(snake.x == right - 2 * grid && snake.y > grid) {
-    // headPassedTop = true;
-    simple = false;
-    return;
+  // Turn simple off when right side reached by tail
+  if (snake.cells.length > 0) {
+    tail = snake.cells[snake.cells.length-1];
+    if(tail.x == 0 && snake.y != 0 || tail.y == 0 && snake.y != 0) {
+      simple = false;
+      return;
+    }
   }
+  // if(snake.x == right - grid && snake.y > grid) {
+  //   // headPassedTop = true;
+  //   simple = false;
+  //   return;
+  // }
 
   // if(!simple && headPassedTop && tailPassedTop) {
   //   headPassedTop = false;
@@ -179,8 +191,9 @@ function setSimple() {
 }
 
 function simple_path() {
+  
+  // Wrap
   if (onTrack){
-
     // Hit top
     if (snake.y == grid){
       if (snake.dy == -grid){
@@ -204,6 +217,7 @@ function simple_path() {
         snake.dy = -grid
       }
     }
+    //Go back to start
   }  else {
     if (snake.y != 0){
       snake.dx = 0;
