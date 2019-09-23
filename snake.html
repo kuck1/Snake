@@ -52,6 +52,21 @@ var apple = {
   y: .5 * bottom
 };
 
+var history = {
+  curr: 1,
+  // cells: [[1],[1],[1],[1],[1],[1],[1],[1],[1],[1]]
+  cells: [
+    [1, 2],
+    [3, 4],
+    [5, 6]
+  ]
+};
+
+var curr = 1;
+var history = [
+  [1],[1],[1],[1],[1],[1],[1],[1],[1],[1]
+];
+
 var appleCount = 1;
 
 var nextApple = {
@@ -246,6 +261,11 @@ function loop() {
     return;
   }
 
+  console.log(history)
+
+  history[curr] = snake.cells;
+  curr = (curr) % 10 + 1;
+
   snake = callAI(snake, apple)
 
   count = 0;
@@ -352,8 +372,7 @@ document.addEventListener('keydown', function(e) {
   // right arrow key
   else if (e.which === 39 && snake.dx === 0) {
     speed = 100000;
-    console.log(headPassedTop);
-    console.log(tailPassedTop);
+    console.log(history[(curr + 10 - 1) % 10]);
     // snake.dx = grid;
     // snake.dy = 0;
   }
