@@ -52,12 +52,21 @@ var apple = {
   y: .5 * bottom
 };
 
+var appleCount = 1;
+
+var nextApple = {
+  x: [.5 * right, 4*grid, 2*grid, 8*grid],
+  y: [.5 * bottom, 3*grid, 12*grid, 3*grid]
+};
+
 var onTrack = false;
 var atStart = true;
 var uTurn = false;
 var simple = true;
 var headPassedTop = false;
 var tailPassedTop = false;
+
+var speed = 10;
 
 // get random whole numbers in a specific range
 // @see https://stackoverflow.com/a/1527820/2124254
@@ -72,6 +81,7 @@ function callAI(snake, apple) {
   setSimple();
 
   if (simple) {
+    console.log("simple")
     update_snake = simple_path();
     return update_snake
   }
@@ -86,21 +96,23 @@ function callAI(snake, apple) {
     } else if (snake.y < apple.y && snake.dy <= 0){
       console.log("apple down")
       if (uTurn) {
-        snake.dy = -grid;
+        snake.dx = 0;
+        snake.dy = grid;
         uTurn = false;
       } else {
-        snake.dy = 0;
         snake.dx = -grid;
+        snake.dy = 0;
         uTurn = true;
       }
     } else if (snake.y > apple.y && snake.dy >= 0){
       console.log("apple up")
       if (uTurn) {
-        snake.dy = grid;
+        snake.dx = 0;
+        snake.dy = -grid;
         uTurn = false;
       } else {
-        snake.dy = 0;
         snake.dx = -grid;
+        snake.dy = 0;
         uTurn = true;
       }
     } else {
@@ -111,9 +123,18 @@ function callAI(snake, apple) {
 } 
 
 function setSimple() {
+
+  // Mark upper left corner
+  if (snake.x == 0 && snake.y == 0) {
+    console.log("UPPER LEFT");
+    console.log(headPassedTop);
+    console.log(tailPassedTop);
+  }
+
+  // Set at start to false
   if (snake.cells.length > 0) {
     tail = snake.cells[snake.cells.length-1];
-    if(tail.x == right - grid && snake.x == right - 2*grid) {
+    if(tail.x == right - grid && snake.x == right - grid) {
       atStart = false;
     }
   }
@@ -122,28 +143,39 @@ function setSimple() {
     simple = true;
     return;
   }
+
+  // Turn simple on when left side reached
   if (snake.x <= grid  || apple.x > snake.x) {
+  // if (snake.x <= grid) {
     simple = true;
     return;
   }
 
-  if(!simple && headPassedTop && tailPassedTop) {
-    headPassedTop = false;
-    tailPassedTop = false;
-  }
-  if(snake.y == 0) {
-    headPassedTop = true;
+
+  // Turn simple off when right side reached
+  if(snake.x == right - 2 * grid && snake.y > grid) {
+    // headPassedTop = true;
+    simple = false;
+    return;
   }
 
-  if (snake.cells.length > 0) {
-    tail = snake.cells[snake.cells.length-1];
-    if(tail.y == 0 || tail.x == right - 2*grid) {
-      tailPassedTop = true;
-    }
-    if (simple && tailPassedTop) {
-      simple = false;
-    }
-  }
+  // if(!simple && headPassedTop && tailPassedTop) {
+  //   headPassedTop = false;
+  //   tailPassedTop = false;
+  // }
+  
+
+  // if (snake.cells.length > 0) {
+  //   tail = snake.cells[snake.cells.length-1];
+  //   if(tail.y == 0 || tail.x == right - 2*grid) {
+  //     console.log("tail passed top");
+  //     tailPassedTop = true;
+  //   }
+  //   if (simple && tailPassedTop) {
+  //     console.log("setting simple false");
+  //     simple = false;
+  //   }
+  // }
 }
 
 function simple_path() {
@@ -196,7 +228,7 @@ function loop() {
   requestAnimationFrame(loop);
 
   // slow game loop to 15 fps instead of 60 (60/15 = 4)
-  if (++count < 4) {
+  if (++count < speed) {
     return;
   }
 
@@ -237,9 +269,16 @@ function loop() {
     if (cell.x === apple.x && cell.y === apple.y) {
       snake.maxCells++;
 
-      // canvas is 400x400 which is 25x25 grids 
-      apple.x = getRandomInt(0, dim) * grid;
-      apple.y = getRandomInt(0, dim) * grid;
+
+      if (appleCount < nextApple.x.length) {
+        apple.x = nextApple.x[appleCount];
+        apple.y = nextApple.y[appleCount];
+        appleCount = appleCount + 1;
+      } else {
+        // canvas is 400x400 which is 25x25 grids 
+        apple.x = getRandomInt(0, dim) * grid;
+        apple.y = getRandomInt(0, dim) * grid;
+      }
     }
 
     // check collision with all cells after this one (modified bubble sort)
@@ -261,6 +300,7 @@ function resetGame() {
   var headPassedTop = false;
   var tailPassedTop = false;
 
+  appleCount = 1;
   snake.x = 160;
   snake.y = 160;
   snake.cells = [];
@@ -283,23 +323,31 @@ document.addEventListener('keydown', function(e) {
   
   // left arrow key
   if (e.which === 37 && snake.dx === 0) {
-    snake.dx = -grid;
-    snake.dy = 0;
+    speed = 4;
+    // snake.dx = -grid;
+    // snake.dy = 0;
   }
   // up arrow key
   else if (e.which === 38 && snake.dy === 0) {
-    snake.dy = -grid;
-    snake.dx = 0;
+    if (speed - 1 >= 0) {
+      speed = speed - 1;
+    }
+    // snake.dy = -grid;
+    // snake.dx = 0;
   }
   // right arrow key
   else if (e.which === 39 && snake.dx === 0) {
-    snake.dx = grid;
-    snake.dy = 0;
+    speed = 100000;
+    console.log(headPassedTop);
+    console.log(tailPassedTop);
+    // snake.dx = grid;
+    // snake.dy = 0;
   }
   // down arrow key
   else if (e.which === 40 && snake.dy === 0) {
-    snake.dy = grid;
-    snake.dx = 0;
+    speed = speed + 2;
+    // snake.dy = grid;
+    // snake.dx = 0;
   }
 });
 
