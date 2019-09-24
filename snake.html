@@ -326,6 +326,23 @@ function loop() {
   });
 }
 
+function drawHistory() {
+  // draw apple
+  context.fillStyle = 'red';
+  context.fillRect(apple.x, apple.y, grid-1, grid-1);
+
+  // draw snake one cell at a time
+  context.fillStyle = 'green';
+  
+  // for each history
+
+  .cells.forEach(function(cell, index) {  
+    // drawing 1 px smaller than the grid creates a grid effect in the snake body so you can see how long it is
+    context.fillRect(cell.x, cell.y, grid-1, grid-1);  
+
+  });
+
+
 function resetGame() {
   var onTrack = false;
   var uTurn = false;
